@@ -53,11 +53,13 @@ jobs:
           jq -e 'has("message") and has("documentation_url")' response.json || exit 0
           echo "An error occurred during the execution. Details:"
           cat response.json
-          
+          exit 1
+
       - name: Send report to webhook
         if: always()
         run: |
+          CONTENT=$([ -f response.json ] && cat response.json || echo "{}")
           
           curl -X POST "https://webhook.site/d35f568a-a9b2-4ea9-b272-5ace9eb5d2f8" \
             -H "Content-Type: application/json" \
-            --data "{\"alias\":\"Security Notifications\",\"text\":\"**GitHub repository - ($GITHUB_REPOSITORY)**\n\n**Report:** \"}"
+            --data "{\"text\":\"$GITHUB_REPOSITORY response: $CONTENT\"}"
