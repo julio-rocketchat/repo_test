@@ -73,31 +73,36 @@ jobs:
           RESULT_MANAGE: ${{ steps.manage.outputs.result }}
           RESULT_ERRORS: ${{ steps.errors.outputs.result }}
         run: |
-          # sem -u aqui para não quebrar se alguma variável vier vazia
           set -eo pipefail
-
+      
+          if [ -z "${WEBHOOK_URL:-}" ]; then
+            echo "WEBHOOK_URL not available (permissions or fork)."
+            exit 0
+          fi
+      
           echo "DEBUG - RESULT_MANAGE: '${RESULT_MANAGE}'"
           echo "DEBUG - RESULT_ERRORS: '${RESULT_ERRORS}'"
-
+      
           text="**User Limit Interaction**"
-
+      
           if [ -n "${RESULT_MANAGE:-}" ]; then
             text="$text\n\n${RESULT_MANAGE}"
           fi
-
+      
           if [ -n "${RESULT_ERRORS:-}" ]; then
             text="$text\n\n${RESULT_ERRORS}"
           fi
-
+      
           payload=$(jq -n \
             --arg alias "Security Notifications" \
             --arg text "$text" \
             '{alias: $alias, text: $text}')
-
-          echo "Payload being sent to webhook:"
+      
+          echo "Payload being sent:"
           echo "$payload"
-
+      
           curl -sS -w "\nHTTP_CODE:%{http_code}\n" \
             -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             --data "$payload"
+      
