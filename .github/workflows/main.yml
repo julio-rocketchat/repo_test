@@ -1,4 +1,4 @@
-name: Interaction Limits Settings Management
+name: Interaction Limits Settings Management (main)
 
 on:
   workflow_dispatch:
