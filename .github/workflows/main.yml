@@ -9,6 +9,7 @@ jobs:
 
     env:
       GITHUB_URL: https://api.github.com/user/interaction-limits
+      PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +19,7 @@ jobs:
         run: |
           set -euo pipefail
           curl -s \
-            -H "Authorization: Bearer ${{ secrets.PERSONAL_TOKEN }}" \
+            -H "Authorization: Bearer ${PERSONAL_TOKEN}" \
             "${GITHUB_URL}" \
             -o response.json
 
@@ -30,7 +31,7 @@ jobs:
           if jq -e '. == {}' response.json; then
             http_code=$(
               curl -s -w "%{http_code}" -o response.json \
-                -H "Authorization: Bearer ${{ secrets.PERSONAL_TOKEN }}" \
+                -H "Authorization: Bearer ${PERSONAL_TOKEN}" \
                 -X PUT \
                 "${GITHUB_URL}" \
                 -d '{"limit":"existing_users","expiry":"six_months"}'
